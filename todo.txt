@@ -1,0 +1,58 @@
+belajar goroutine dan asynchroonous
+  belajar dari source online
+  cek lagi dari chatgpt
+
+bikin departure time garuda indonesia yang ada timezonenya
+  bikin versi yang ada timezonenya
+  merge timezonenya
+
+
+lanjut search aggregator code buat Garuda
+
+lanjut searchAirlineAggregator, tambahin logic buat generate results, tambahin buat specs
+
+sistem filter
+  by tanggal
+  cek lagi filter by apa aja
+
+sebar call 
+    call garuda indonesia
+    call lion air
+    bikin call pertama sequential, abis tuh bikin callnya async
+        bikin time limit misal 1 second
+    
+ganti dari mock, tambahin search_criteria di result
+
+sekarang kerjain yang buat aggregatornya.
+taro di port 8081
+search spec sekian, lakuin agregasi
+siapin juga kalau error di airasia
+
+caching system
+  ganti cache hit di result
+
+naming airport. denpasar malah jadi denpasar bali
+airline name batik air ada spasi. bakal masalah di ID result kita?
+  di garuda indonesia juga begitu
+  di lion air juga begitu
+provider juga sama issuenya dengan yg atas
+
+departure time lion air, belum pake RFC, masih pake dari payload
+
+bonus points belakangan aja. soalnya keliatan sulit semua.
+
+yg sort
+
+kesulitan:
+baru pertama kali megang golang
+http body print malah keluarnya unicode
+nguli banyak bgt, 4 providers
+konversi dari city ke jakarta
+ga mungkin bisa 3 hari kalau fulltime
+golang ternyata pakai huruf besar untuk naming variablenya
+baggage note airasia, cuman ada 1 sample
+yg departuredatetime batik air ternyata beda dari RFC
+garuda indonesia departurenya somehow ga sesuai RFC. padahal kalau tanya chatgpt udah sama
+  ternyata masalahnya diapit "" ("time.RFC3339")
+pelajarin lagi goroutine biar bisa asynchronous
+buat penggunaan mutex goroutine keliatan terlalu banyak. jadinya pake yang diajarin sama chatgpt
