@@ -1,3 +1,16 @@
+itung total waktu pengerjaan
+  senin ga ngapa"in
+  selasa latihan go setengah hari
+  rabu kerjain ga nyampe setengah hari
+  kamis kerjain external web service setengah hari
+  jumat kerjain ampe aggregator setengah hari
+  sabtu lanjut ampe aggregator bisa selesai semua provider setengah hari
+  minggu lanjut goroutine setengah hari
+
+push ke github
+
+bikin readme
+
 belajar goroutine dan asynchroonous
   belajar dari source online
   cek lagi dari chatgpt

@@ -12,6 +12,7 @@ import (
 	"strings"
 	"regexp"
 	"strconv"
+	"sync"
 )
 
 type SearchResult struct {
@@ -846,50 +847,87 @@ func searchLionAir() ([]SearchResultSearchFlight, error) {
 func searchAirlineAggregator(c *gin.Context) {
 	start := time.Now()
 
-	var searchResult = SearchResult {}
+	var searchResult SearchResult
 
 	var providersQueried = 0
 	var providersError = 0
 
-	// Search air asia
-	var searchAirAsiaFlightResult, err = searchAirAsia()
-	providersQueried += 1
-	if (err != nil) {
-		providersError += 1
-	} else {
-		// add to flight
-		searchResult.Flights = append(searchResult.Flights, searchAirAsiaFlightResult...)
+	// Async version
+	searchers := []func() ([]SearchResultSearchFlight, error){
+		searchAirAsia,
+		searchBatikAir,
+		searchGarudaIndonesia,
+		searchLionAir,
 	}
 
-	// Search batik air
-	var searchBatikAirFlightResult, errBatikAir = searchBatikAir()
-	providersQueried += 1
-	if (errBatikAir != nil) {
-		providersError += 1
-	} else {
-		// add to flight
-		searchResult.Flights = append(searchResult.Flights, searchBatikAirFlightResult...)
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+
+	providersQueried = len (searchers)
+	providersError = 0
+
+	for _,search := range searchers {
+		wg.Add(1)
+
+		go func(search func() ([]SearchResultSearchFlight, error)) {
+			defer wg.Done()
+
+			flights, err := search()
+			if (err != nil) {
+				mu.Lock()
+				providersError++
+				mu.Unlock()
+				return
+			}
+
+			mu.Lock()
+			searchResult.Flights = append(searchResult.Flights, flights...)
+			mu.Unlock()
+		}(search)
 	}
 
-	// Search Garuda Indonesia
-	var searchGarudaIndonesiaFlightResult, errGarudaIndonesia = searchGarudaIndonesia()
-	providersQueried += 1
-	if (errGarudaIndonesia != nil) {
-		providersError += 1
-	} else {
-		// add to flight
-		searchResult.Flights = append(searchResult.Flights, searchGarudaIndonesiaFlightResult...)
-	}
+	wg.Wait()
 
-	// Search Lion Air
-	var searchLionAirFlightResult, errLionAir = searchLionAir()
-	providersQueried += 1
-	if (errLionAir != nil) {
-		providersError += 1
-	} else {
-		// add to flight
-		searchResult.Flights = append(searchResult.Flights, searchLionAirFlightResult...)
-	}
+	// Sync version
+	// // Search air asia
+	// var searchAirAsiaFlightResult, err = searchAirAsia()
+	// providersQueried += 1
+	// if (err != nil) {
+	// 	providersError += 1
+	// } else {
+	// 	// add to flight
+	// 	searchResult.Flights = append(searchResult.Flights, searchAirAsiaFlightResult...)
+	// }
+
+	// // Search batik air
+	// var searchBatikAirFlightResult, errBatikAir = searchBatikAir()
+	// providersQueried += 1
+	// if (errBatikAir != nil) {
+	// 	providersError += 1
+	// } else {
+	// 	// add to flight
+	// 	searchResult.Flights = append(searchResult.Flights, searchBatikAirFlightResult...)
+	// }
+
+	// // Search Garuda Indonesia
+	// var searchGarudaIndonesiaFlightResult, errGarudaIndonesia = searchGarudaIndonesia()
+	// providersQueried += 1
+	// if (errGarudaIndonesia != nil) {
+	// 	providersError += 1
+	// } else {
+	// 	// add to flight
+	// 	searchResult.Flights = append(searchResult.Flights, searchGarudaIndonesiaFlightResult...)
+	// }
+
+	// // Search Lion Air
+	// var searchLionAirFlightResult, errLionAir = searchLionAir()
+	// providersQueried += 1
+	// if (errLionAir != nil) {
+	// 	providersError += 1
+	// } else {
+	// 	// add to flight
+	// 	searchResult.Flights = append(searchResult.Flights, searchLionAirFlightResult...)
+	// }
 
 	duration := time.Since(start).Milliseconds()
 	
