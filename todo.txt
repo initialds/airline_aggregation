@@ -1,3 +1,8 @@
+rapiin readme.md
+push ke github
+siapin yang diperlukan buat pengiriman ke bookcabin
+bikin email buat kasih ke book cabin
+
 untuk sementara filter sesuai dengan yang di contoh spek aja. ada kendala secara waktu
 
 filter yang lain" sesuai spek soal
@@ -6,8 +11,6 @@ filter yang lain" sesuai spek soal
   arrival times
   airlines
   duration
-
-push ke github
 
 sistem filter
   kalau filter spec null, artinya ga nyari by itu?
@@ -38,6 +41,7 @@ improvements:
 circuit breaker untuk tiap airline
 unit tests
 dibikin filter spec yang bisa kosongan
+sort bisa dibikin multi level sort
 
 kesulitan:
 baru pertama kali megang golang

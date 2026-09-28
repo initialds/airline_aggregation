@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"sync"
 	"github.com/patrickmn/go-cache"
+	"sort"
 )
 
 type SearchResult struct {
@@ -831,6 +832,32 @@ func filterProviderAirlineResult(searchCriteria SearchCriteria, flights []Search
 	return filteredFlight
 }
 
+func sortAirlineAggregationResult(sortCriteria string, flights []SearchResultSearchFlight){
+	if (sortCriteria == "price_highest") {
+		sort.Slice(flights, func(i, j int) bool {
+			return flights[i].Price.Amount > flights[j].Price.Amount
+		})
+	}
+
+	if (sortCriteria == "price_lowest") {
+		sort.Slice(flights, func(i, j int) bool {
+			return flights[i].Price.Amount < flights[j].Price.Amount
+		})
+	}
+
+	if (sortCriteria == "duration_shortest") {
+		sort.Slice(flights, func(i, j int) bool {
+			return flights[i].Duration.TotalMinutes < flights[j].Duration.TotalMinutes
+		})
+	}
+
+	if (sortCriteria == "duration_longest") {
+		sort.Slice(flights, func(i, j int) bool {
+			return flights[i].Duration.TotalMinutes > flights[j].Duration.TotalMinutes
+		})
+	}
+}
+
 func searchAirlineAggregator(c *gin.Context) {
 	start := time.Now()
 
@@ -852,6 +879,7 @@ func searchAirlineAggregator(c *gin.Context) {
 		CabinClass: c.Query("cabin_class"),
 	}
 
+	sortCriteria := c.Query("sort_criteria")
 
 	// Construct search result
 	var searchResult SearchResult
@@ -952,6 +980,9 @@ func searchAirlineAggregator(c *gin.Context) {
 	// 	// add to flight
 	// 	searchResult.Flights = append(searchResult.Flights, searchLionAirFlightResult...)
 	// }
+
+	// Sort search results
+	sortAirlineAggregationResult(sortCriteria, searchResult.Flights)
 
 	duration := time.Since(start).Milliseconds()
 	
