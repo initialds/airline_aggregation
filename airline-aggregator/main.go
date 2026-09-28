@@ -16,16 +16,16 @@ import (
 )
 
 type SearchResult struct {
-	SearchCriteria SearchResultSearchCriteria `json:"search_criteria"`
+	SearchCriteria SearchCriteria `json:"search_criteria"`
 	Metadata SearchResultSearchMetadata `json:"metadata"`
 	Flights []SearchResultSearchFlight `json:"flights"`
 }
 
-type SearchResultSearchCriteria struct {
+type SearchCriteria struct {
 	Origin string `json:"origin"`
 	Destination string `json:"destination"`
 	DepartureDate string `json:"departure_date"`
-	Passengers string `json:"passengers"`
+	Passengers uint `json:"passengers"`
 	CabinClass string `json:"cabin_class"`
 }
 
@@ -82,68 +82,6 @@ type SearchResultSearchFlightBaggage struct {
 	Checked string `json:"checked"`
 }
 
-func mockSearchResult() SearchResult {
-	searchResult := SearchResult {
-		SearchCriteria: SearchResultSearchCriteria{
-			Origin: "CGK",
-			Destination: "DPS",
-			DepartureDate: "2025-12-15",
-			Passengers: "1",
-			CabinClass: "economy",
-		},
-		Metadata: SearchResultSearchMetadata{
-			TotalResults: 15,
-			ProvidersQueried: 4,
-			ProvidersSucceeded: 4,
-			ProvidersFailed: 0,
-			SearchTimeMs: 285,
-			CacheHit: false,
-		},
-		Flights: []SearchResultSearchFlight {
-			{
-				ID: "QZ7250_AirAsia",
-				Provider: "AirAsia",
-				Airline: SearchResultSearchFlightAirline {
-					Name: "AirAsia",
-					Code: "QZ",
-				},
-				FlightNumber: "QZ7250",
-				Departure: SearchResultSearchFlightDepartureArrival {
-					Airport: "CGK",
-					City: "Jakarta",
-					Datetime: "2025-12-15T15:15:00+07:00",
-					Timestamp: 1734246900,
-				},
-				Arrival: SearchResultSearchFlightDepartureArrival {
-					Airport: "DPS",
-					City: "Denpasar",
-					Datetime: "2025-12-15T20:35:00+08:00",
-					Timestamp: 1734267300,
-				},
-				Duration: SearchResultSearchFlightDuration {
-					TotalMinutes: 260,
-					Formatted: "4h 20m",
-				},
-				Stops: 1,
-				Price: SearchResultSearchFlightPrice {
-					Amount: 485000,
-					Currency: "IDR",
-				},
-				AvailableSeats: 88,
-				CabinClass: "economy",
-				Aircraft: nil,
-				Amenities: []string {},
-				Baggage: SearchResultSearchFlightBaggage {
-					CarryOn: "Cabin baggage only",
-					Checked: "Additional fee",
-				},
-			},
-		},
-	}
-
-	return searchResult
-}
-
 type AirasiaPayload struct {
 	Status string `json:"status"`
 	Flights []AirasiaFlight `json:"flights"`
@@ -171,7 +109,7 @@ type AirasiaFlightStops struct {
 	WaitTimeMinutes uint `json:"wait_time_minutes"`
 }
 
-func searchAirAsia() ([]SearchResultSearchFlight, error) {
+func searchAirAsia(searchCriteria SearchCriteria) ([]SearchResultSearchFlight, error) {
 	resp, err := http.Get("http://localhost:8080/airasia/search")
 	if err != nil || resp.StatusCode != http.StatusOK {
 		return nil, errors.New("Error on getting air asia")
@@ -277,7 +215,10 @@ func searchAirAsia() ([]SearchResultSearchFlight, error) {
 		result = append(result, flightItem)
 	}
 	
-	return result, nil
+	// Do filter in here
+	var filteredFlight = filterProviderAirlineResult(searchCriteria, result)
+
+	return filteredFlight, nil
 }
 
 // Batik air related
@@ -320,7 +261,7 @@ type BatikAirFlightConnections struct {
 }
 
 
-func searchBatikAir() ([]SearchResultSearchFlight, error) {
+func searchBatikAir(searchCriteria SearchCriteria) ([]SearchResultSearchFlight, error) {
 	resp, err := http.Get("http://localhost:8080/batikAir/search")
 	if err != nil || resp.StatusCode != http.StatusOK {
 		return nil, errors.New("Error on getting batik air")
@@ -410,13 +351,13 @@ func searchBatikAir() ([]SearchResultSearchFlight, error) {
 			Departure: SearchResultSearchFlightDepartureArrival {
 				Airport: flight.Origin,
 				City: iata.ParseAirportCode(flight.Origin).Airport().Name,
-				Datetime: flight.DepartureDateTime,
+				Datetime: departureTime.Format(time.RFC3339),
 				Timestamp: departureTimestamp,
 			},
 			Arrival: SearchResultSearchFlightDepartureArrival {
 				Airport: flight.Destination,
 				City: iata.ParseAirportCode(flight.Destination).Airport().Name,
-				Datetime: flight.ArrivalDateTime,
+				Datetime: arrivalTime.Format(time.RFC3339),
 				Timestamp: arrivalTimestamp,
 			},
 			Duration: SearchResultSearchFlightDuration {
@@ -441,7 +382,10 @@ func searchBatikAir() ([]SearchResultSearchFlight, error) {
 		result = append(result, flightItem)
 	}
 
-	return result, nil
+	// Do filter in here
+	var filteredFlight = filterProviderAirlineResult(searchCriteria, result)
+
+	return filteredFlight, nil
 }
 
 // Garuda Indonesia related
@@ -496,7 +440,7 @@ type GarudaIndonesiaFlightBaggage struct {
 	Checked uint `json:"checked"`
 }
 
-func searchGarudaIndonesia() ([]SearchResultSearchFlight, error) {
+func searchGarudaIndonesia(searchCriteria SearchCriteria) ([]SearchResultSearchFlight, error) {
 	resp, err := http.Get("http://localhost:8080/garudaIndonesia/search")
 	if err != nil || resp.StatusCode != http.StatusOK {
 		return nil, errors.New("Error on getting Garuda Indonesia")
@@ -617,7 +561,10 @@ func searchGarudaIndonesia() ([]SearchResultSearchFlight, error) {
 		result = append(result, flightItem)
 	}
 
-	return result, nil
+	// Do filter in here
+	var filteredFlight = filterProviderAirlineResult(searchCriteria, result)
+
+	return filteredFlight, nil
 }
 
 // Lion air
@@ -690,7 +637,7 @@ type LionAirFlightServicesBaggageAllowance struct {
 	Hold string `json:"hold"`
 }
 
-func searchLionAir() ([]SearchResultSearchFlight, error) {
+func searchLionAir(searchCriteria SearchCriteria) ([]SearchResultSearchFlight, error) {
 	resp, err := http.Get("http://localhost:8080/lionAir/search")
 	if err != nil || resp.StatusCode != http.StatusOK {
 		return nil, errors.New("Error on getting Lion air")
@@ -770,12 +717,12 @@ func searchLionAir() ([]SearchResultSearchFlight, error) {
 		}
 
 		// // Cabin class
-		// var cabinClass string
-		// if (flight.Fare.Class == "Y") {
-		// 	cabinClass = "economy"
-		// } else {
-		// 	cabinClass = "undefined"
-		// }
+		var cabinClass string
+		if (flight.Pricing.FareType == "ECONOMY") {
+			cabinClass = "economy"
+		} else {
+			cabinClass = "undefined"
+		}
 		
 		// // // Baggage
 		// var carryOn string
@@ -810,13 +757,13 @@ func searchLionAir() ([]SearchResultSearchFlight, error) {
 			Departure: SearchResultSearchFlightDepartureArrival {
 				Airport: flight.Route.From.Code,
 				City: flight.Route.From.City,
-				Datetime: flight.Schedule.Departure,
+				Datetime: departureTime.Format(time.RFC3339),
 				Timestamp: departureTimestamp,
 			},
 			Arrival: SearchResultSearchFlightDepartureArrival {
 				Airport: flight.Route.To.Code,
 				City: flight.Route.To.City,
-				Datetime: flight.Schedule.Arrival,
+				Datetime: arrivalTime.Format(time.RFC3339),
 				Timestamp: arrivalTimestamp,
 			},
 			Duration: SearchResultSearchFlightDuration {
@@ -829,7 +776,7 @@ func searchLionAir() ([]SearchResultSearchFlight, error) {
 				Currency: flight.Pricing.Currency,
 			},
 			AvailableSeats: flight.SeatsLeft,
-			CabinClass: flight.Pricing.FareType,
+			CabinClass: cabinClass,
 			Aircraft: &flight.PlaneType,
 			Amenities: amenities,
 			Baggage: SearchResultSearchFlightBaggage {
@@ -841,19 +788,79 @@ func searchLionAir() ([]SearchResultSearchFlight, error) {
 		result = append(result, flightItem)
 	}
 
-	return result, nil
+	// Do filter in here
+	var filteredFlight = filterProviderAirlineResult(searchCriteria, result)
+
+	return filteredFlight, nil
+}
+
+func filterProviderAirlineResult(searchCriteria SearchCriteria, flights []SearchResultSearchFlight) []SearchResultSearchFlight{
+	// Do filter in here
+	var filteredFlight []SearchResultSearchFlight
+	for _,flight := range flights {
+		// convert date time
+		specDate := searchCriteria.DepartureDate
+		flightDate := flight.Departure.Datetime
+
+		t1, err := time.Parse("2006-01-02", specDate)
+		if err != nil {
+			fmt.Println("error on parsing time for spec date", specDate)
+			t1 = time.Now()
+		}
+
+		t2, err := time.Parse(time.RFC3339, flightDate)
+		if err != nil {
+			fmt.Println("error on parsing time for flight date", flightDate)
+			t2 = time.Now().Add(-10000 * time.Second)
+		}
+
+		sameDate := t1.Year() == t2.Year() &&
+		t1.Month() == t2.Month() &&
+		t1.Day() == t2.Day()
+
+		if (searchCriteria.Origin == flight.Departure.Airport && 
+			searchCriteria.Destination == flight.Arrival.Airport &&
+			sameDate &&
+			searchCriteria.Passengers <= flight.AvailableSeats &&
+			searchCriteria.CabinClass == flight.CabinClass) {
+			filteredFlight = append(filteredFlight, flight)
+		}
+	}
+
+	return filteredFlight
 }
 
 func searchAirlineAggregator(c *gin.Context) {
 	start := time.Now()
 
+	// Construct Search specs
+	passengers, err := strconv.ParseUint(c.Query("passengers"), 10, 0)
+	if err != nil {
+		// handle invalid passengers parameter
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid passengers",
+		})
+		return
+	}
+
+	searchCriteria := SearchCriteria {
+		Origin: c.Query("origin"),
+		Destination: c.Query("destination"),
+		DepartureDate: c.Query("departure_date"),
+		Passengers: uint(passengers),
+		CabinClass: c.Query("cabin_class"),
+	}
+
+
 	var searchResult SearchResult
+
+	searchResult.SearchCriteria = searchCriteria
 
 	var providersQueried = 0
 	var providersError = 0
 
 	// Async version
-	searchers := []func() ([]SearchResultSearchFlight, error){
+	searchers := []func(SearchCriteria) ([]SearchResultSearchFlight, error){
 		searchAirAsia,
 		searchBatikAir,
 		searchGarudaIndonesia,
@@ -869,10 +876,10 @@ func searchAirlineAggregator(c *gin.Context) {
 	for _,search := range searchers {
 		wg.Add(1)
 
-		go func(search func() ([]SearchResultSearchFlight, error)) {
+		go func(search func(SearchCriteria) ([]SearchResultSearchFlight, error)) {
 			defer wg.Done()
 
-			flights, err := search()
+			flights, err := search(searchCriteria)
 			if (err != nil) {
 				mu.Lock()
 				providersError++

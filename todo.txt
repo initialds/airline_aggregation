@@ -1,45 +1,35 @@
-itung total waktu pengerjaan
-  senin ga ngapa"in
-  selasa latihan go setengah hari
-  rabu kerjain ga nyampe setengah hari
-  kamis kerjain external web service setengah hari
-  jumat kerjain ampe aggregator setengah hari
-  sabtu lanjut ampe aggregator bisa selesai semua provider setengah hari
-  minggu lanjut goroutine setengah hari
+filter garuda indonesia
+  kalau ga salah econonmynya beda sendiri
+
+samain filter tanggal antar airline
 
 push ke github
 
-bikin readme
+filter tanggal search air asia
 
-belajar goroutine dan asynchroonous
-  belajar dari source online
-  cek lagi dari chatgpt
+abis tuh filternya ditaro di airline lain
+
+filter
+  airasia
+  batik air
+  garuda indonesia
+  lion air
+  filter spec kosongan. mungkin bisa pake or logic
+
+sistem filter
+  by tanggal
+  price range
+  cek lagi filter by apa aja
+  kalau filter spec null, artinya ga nyari by itu?
+  filter per provider? atau dari semua? either way kalau dari provider mestinya bisa filtered search kan?
+    atau bikin yang global trus jelasin by provider lebih bagus?
+  kalau sort jelas dari global
+
+ganti dari mock, tambahin search_criteria di result
 
 bikin departure time garuda indonesia yang ada timezonenya
   bikin versi yang ada timezonenya
   merge timezonenya
-
-
-lanjut search aggregator code buat Garuda
-
-lanjut searchAirlineAggregator, tambahin logic buat generate results, tambahin buat specs
-
-sistem filter
-  by tanggal
-  cek lagi filter by apa aja
-
-sebar call 
-    call garuda indonesia
-    call lion air
-    bikin call pertama sequential, abis tuh bikin callnya async
-        bikin time limit misal 1 second
-    
-ganti dari mock, tambahin search_criteria di result
-
-sekarang kerjain yang buat aggregatornya.
-taro di port 8081
-search spec sekian, lakuin agregasi
-siapin juga kalau error di airasia
 
 caching system
   ganti cache hit di result
@@ -54,7 +44,16 @@ departure time lion air, belum pake RFC, masih pake dari payload
 
 bonus points belakangan aja. soalnya keliatan sulit semua.
 
-yg sort
+sort di situ
+
+perbaikin readme.md
+push github
+bikin zip
+
+improvements:
+circuit breaker untuk tiap airline
+unit tests
+dibikin filter spec yang kosongan
 
 kesulitan:
 baru pertama kali megang golang
@@ -69,3 +68,12 @@ garuda indonesia departurenya somehow ga sesuai RFC. padahal kalau tanya chatgpt
   ternyata masalahnya diapit "" ("time.RFC3339")
 pelajarin lagi goroutine biar bisa asynchronous
 buat penggunaan mutex goroutine keliatan terlalu banyak. jadinya pake yang diajarin sama chatgpt
+
+itung total waktu pengerjaan
+  senin ga ngapa"in
+  selasa latihan go setengah hari
+  rabu kerjain ga nyampe setengah hari
+  kamis kerjain external web service setengah hari
+  jumat kerjain ampe aggregator setengah hari
+  sabtu lanjut ampe aggregator bisa selesai semua provider setengah hari
+  minggu lanjut goroutine setengah hari
