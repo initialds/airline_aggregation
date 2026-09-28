@@ -5,6 +5,7 @@ go 1.27.1
 require (
 	github.com/echa/code v1.0.1
 	github.com/gin-gonic/gin v1.12.0
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 )
 
 require (

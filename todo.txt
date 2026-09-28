@@ -1,50 +1,34 @@
-filter garuda indonesia
-  kalau ga salah econonmynya beda sendiri
+untuk sementara filter sesuai dengan yang di contoh spek aja. ada kendala secara waktu
 
-samain filter tanggal antar airline
+filter yang lain" sesuai spek soal
+  price range
+  number of stops
+  arrival times
+  airlines
+  duration
 
 push ke github
 
-filter tanggal search air asia
-
-abis tuh filternya ditaro di airline lain
-
-filter
-  airasia
-  batik air
-  garuda indonesia
-  lion air
-  filter spec kosongan. mungkin bisa pake or logic
-
 sistem filter
-  by tanggal
-  price range
-  cek lagi filter by apa aja
   kalau filter spec null, artinya ga nyari by itu?
   filter per provider? atau dari semua? either way kalau dari provider mestinya bisa filtered search kan?
     atau bikin yang global trus jelasin by provider lebih bagus?
   kalau sort jelas dari global
 
-ganti dari mock, tambahin search_criteria di result
-
-bikin departure time garuda indonesia yang ada timezonenya
-  bikin versi yang ada timezonenya
-  merge timezonenya
-
-caching system
-  ganti cache hit di result
-
 naming airport. denpasar malah jadi denpasar bali
+
 airline name batik air ada spasi. bakal masalah di ID result kita?
   di garuda indonesia juga begitu
   di lion air juga begitu
 provider juga sama issuenya dengan yg atas
 
-departure time lion air, belum pake RFC, masih pake dari payload
-
 bonus points belakangan aja. soalnya keliatan sulit semua.
 
-sort di situ
+sort
+  price lowest/highest
+  duration shortest/longest
+  departure time
+  arrival time
 
 perbaikin readme.md
 push github
@@ -53,7 +37,7 @@ bikin zip
 improvements:
 circuit breaker untuk tiap airline
 unit tests
-dibikin filter spec yang kosongan
+dibikin filter spec yang bisa kosongan
 
 kesulitan:
 baru pertama kali megang golang
@@ -77,3 +61,6 @@ itung total waktu pengerjaan
   jumat kerjain ampe aggregator setengah hari
   sabtu lanjut ampe aggregator bisa selesai semua provider setengah hari
   minggu lanjut goroutine setengah hari
+  Senin dari jam 14.00
+    lanjut kerjain filter by date
+    cobain filter dan adapt di semua airline

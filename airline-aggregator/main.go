@@ -13,6 +13,7 @@ import (
 	"regexp"
 	"strconv"
 	"sync"
+	"github.com/patrickmn/go-cache"
 )
 
 type SearchResult struct {
@@ -852,7 +853,23 @@ func searchAirlineAggregator(c *gin.Context) {
 	}
 
 
+	// Construct search result
 	var searchResult SearchResult
+
+	var cacheKey = fmt.Sprintf("%v",searchCriteria)
+
+	if cached, found := searchAirlineAggregatorCache.Get(cacheKey); found {
+		searchResult = cached.(SearchResult)
+
+		// update metadata
+		duration := time.Since(start).Milliseconds()
+		searchResult.Metadata.SearchTimeMs = duration
+		searchResult.Metadata.CacheHit = true
+		
+		
+		c.IndentedJSON(http.StatusOK, searchResult)
+		return
+	}
 
 	searchResult.SearchCriteria = searchCriteria
 
@@ -944,9 +961,16 @@ func searchAirlineAggregator(c *gin.Context) {
 	searchResult.Metadata.ProvidersSucceeded = providersQueried - providersError
 	searchResult.Metadata.ProvidersFailed = providersError
 	searchResult.Metadata.SearchTimeMs = duration
+
+	searchAirlineAggregatorCache.Set(cacheKey, searchResult, cache.DefaultExpiration)
 	
 	c.IndentedJSON(http.StatusOK, searchResult)
 }
+
+var searchAirlineAggregatorCache = cache.New(
+	5*time.Second, // default expiration
+    10*time.Second, // cleanup interval
+)
 
 func main() {
     router := gin.Default()
